@@ -133,30 +133,34 @@ output application/json
             </on-error-propagate>
         </error-handler>
     </flow>
-    <flow name="get:\bio\(id):super-biodata-sapi-config">
-        <ee:transform doc:name="Transform Message">
-            <ee:variables>
-                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform doc:name="Transform Message">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
+	<flow name="get:\bio\(id):super-biodata-sapi-config" doc:id="75ebf407-756c-458a-a304-f47e94ce5872">
+		<logger level="INFO" doc:name="Logger" doc:id="0a1a70f8-7337-4c4e-bb3f-42212ed6a9dd" message="#['\n********************************************\n' ++ 'Flow started with correlation id - ' ++ correlationId ++  '\n********************************************\n']" />
+		<ee:transform doc:name="Transform Message" doc:id="60dea019-cbd1-4c2e-bb92-7e4750290b17">
+			<ee:variables>
+				<ee:set-variable variableName="id"><![CDATA[attributes.uriParams.'id']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<mongo:find-documents collectionName="superBio" fields="," doc:name="Find documents" doc:id="c98a01b3-8f13-474c-b3fd-bb1868924039" config-ref="MongoDB_Config">
+			<mongo:query><![CDATA[#[output application/json
+---
+{"id": vars.id}]]]></mongo:query>
+		</mongo:find-documents>
+		<ee:transform doc:name="Transform Message1" doc:id="a6c02993-7bd9-468b-9137-70285655b3b9">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-{
-  "_id": {
-    "\$oid": "61f4e481ab7feb3fbd1d25a4"
-  },
-  id: "DC0002",
-  name: "Wonder Woman",
-  fullname: "Diana Prince",
-  birthplace: "Themyscira",
-  base: "-",
-  publisher: "DC Comics",
-  occupation: "Protector of Paradise Island; former Goddess of Truth"
-} as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
-    </flow>
+payload reduce ($ ++ $$)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger1" doc:id="65b7d436-106d-4ea1-8740-e07a9d84e09b" message="#['\n********************************************\n' ++ 'Flow End' ++  '\n********************************************\n']" />
+	</flow>
+	<flow name="api-liveness-flow" doc:id="d1988b8c-cb31-4831-b4d6-d13cb7bab69d" >
+		<http:listener doc:name="Listener" doc:id="f962467f-d186-4fdd-ab04-0102da499d8a" config-ref="super-biodata-sapi-httpListenerConfig" path="/live" >
+			<http:error-response >
+				<http:body ><![CDATA[DEAD]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<set-payload value="LIVE" doc:name="LIVE" doc:id="a0023cb7-a1ae-4979-b58e-b90bd94536c3" />
+	</flow>
 </mule>
