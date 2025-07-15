@@ -15,13 +15,13 @@ http://www.mulesoft.org/schema/mule/mongo http://www.mulesoft.org/schema/mule/mo
 			connectionString='#["mongodb+srv://superuser:SuperPassword@supercluster.d83jj.mongodb.net/superData?retryWrites=true&amp;w=majority"]' />
 	</mongo:config>
 	<flow name="super-biodata-sapi-main">
-        <http:listener config-ref="super-biodata-sapi-httpListenerConfig" path="/api/*">
+        <http:listener config-ref="super-biodata-sapi-httpListenerConfig" path="/api/v1/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:response>
             <http:error-response statusCode="#[vars.httpStatus default 500]">
-                <http:body>#[payload]</http:body>
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:error-response>
         </http:listener>
         <apikit:router config-ref="super-biodata-sapi-config" />
